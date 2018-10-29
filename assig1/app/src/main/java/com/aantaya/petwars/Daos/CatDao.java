@@ -1,5 +1,6 @@
 package com.aantaya.petwars.Daos;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 
@@ -16,5 +17,5 @@ public interface CatDao {
     void incrementVotes(int id);
 
     @Query("SELECT * FROM cat_table ORDER BY votes DESC")
-    List<CatEntity> getAllCats();
+    LiveData<List<CatEntity>> getAllCats();
 }
