@@ -14,7 +14,7 @@ public interface CatDao {
 
     @Query("UPDATE cat_table SET votes= votes + 1 WHERE _id =:id")
     void incrementVotes(int id);
-    
+
     @Query("SELECT * FROM cat_table ORDER BY votes DESC")
     List<CatEntity> getAllCats();
 }

@@ -21,16 +21,38 @@ public class CatEntity {
     @ColumnInfo(name = "votes")
     private long votes;
 
-    //Constructor
-    public CatEntity(long _imageId){
+    @NonNull
+    @ColumnInfo(name = "name")
+    private String name;
+
+    @NonNull
+    @ColumnInfo(name = "description")
+    private String description;
+
+    //Default Constructor
+    public CatEntity(String _name, long _imageId){
+        this.name = _name;
+        this.imageId = _imageId;
+        this.votes = 0;
+    }
+
+    public CatEntity(String _name, String _desc, long _imageId){
+        this.name = _name;
+        this.description = _desc;
         this.imageId = _imageId;
         this.votes = 0;
     }
 
     //Getters for accessing values in the model
     @NonNull
-    public long getImageId() { return imageId; }
+    public long getImageId() { return this.imageId; }
 
     @NonNull
-    public long getVotes() { return votes;}
+    public long getVotes() { return this.votes; }
+
+    @NonNull
+    public String getName() { return this.name; }
+
+    @NonNull
+    public String getDescription() { return this.description; }
 }
