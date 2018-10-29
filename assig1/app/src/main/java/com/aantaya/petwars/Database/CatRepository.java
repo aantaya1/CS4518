@@ -3,6 +3,7 @@ package com.aantaya.petwars.Database;
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.aantaya.petwars.Daos.CatDao;
 import com.aantaya.petwars.Entities.CatEntity;

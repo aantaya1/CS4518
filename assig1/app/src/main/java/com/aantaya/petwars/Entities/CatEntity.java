@@ -37,7 +37,7 @@ public class CatEntity {
         this.description = description;
     }
 
-    //Getters for accessing values in the model
+    //Getters and setters for manipulating the model
 
     @NonNull
     public int get_id() { return _id; }

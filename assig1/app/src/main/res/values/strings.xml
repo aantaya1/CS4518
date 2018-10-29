@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">PetWars</string>
+    <string name="hint_imageid">Number...</string>
+    <string name="hint_name">Snuffles...</string>
+    <string name="hint_desc">Very cute cat...</string>
+    <string name="button_save">Save</string>
+    <string name="empty_not_saved">Cat not saved because it is empty.</string>
 </resources>
