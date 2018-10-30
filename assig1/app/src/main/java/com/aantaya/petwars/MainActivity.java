@@ -193,8 +193,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-        }else{
-            
         }
     }
 
