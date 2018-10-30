@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -18,6 +19,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+
+import com.aantaya.petwars.Database.CatRepository;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,6 +53,7 @@ public class AddCatActivity extends AppCompatActivity {
         myEditDescView = findViewById(R.id.edit_cat_desc);
         myImageCatView = findViewById(R.id.cat_image);
 
+
         final Button upload = findViewById(R.id.upload_image);
         upload.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -81,45 +85,27 @@ public class AddCatActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PICK_IMAGE) {
             Uri uri = data.getData();
-            try{
+            try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 myImageCatView.setImageBitmap(bitmap);
-
-                if (Build.VERSION.SDK_INT >= 23) {
-                    if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        Log.v(TAG,"Permission is granted");
-                        // Assume block needs to be inside a Try/Catch block.
-                        String path = getApplicationContext().getFilesDir().toString();
-                        OutputStream fOut = null;
-                        Integer counter = 0;
-                        File file = new File(path, "cat"+counter+".jpg"); // the File to save, append increasing numeric counter to prevent files from getting overwritten.
-                        fOut = new FileOutputStream(file);
-
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut); // saving the Bitmap to a file compressed as a JPEG with 85% compression rate
-                        fOut.flush(); // Not really required
-                        fOut.close(); // do not forget to close the stream
-
-                        imagePath = file.getAbsolutePath();
-                        MediaStore.Images.Media.insertImage(getContentResolver(),file.getAbsolutePath(),file.getName(),file.getName());
-                    } else {
-                        Log.v(TAG,"Permission is revoked");
-                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                    }
-                }
-                else { //permission is automatically granted on sdk<23 upon installation
-                    Log.v(TAG,"Permission is granted");
+                boolean temp = isWriteStoragePermissionGranted();
+                Log.v(TAG, "*****Permissions: " + temp);
+                if (temp) {
                     // Assume block needs to be inside a Try/Catch block.
-                    String path = getApplicationContext().getFilesDir().toString();
+                    File dir = new File(getApplicationContext().getFilesDir()+File.separator+"images");
+                    dir.mkdir();
+                    String path = dir.toString();
+                    long count = dir.listFiles().length+1;
+                    String fileName = "cat" + count + ".jpg";
+                    Log.v(TAG, "Saving Image = " + fileName);
+                    Log.v(TAG, "Location = " + path);
                     OutputStream fOut = null;
-                    Integer counter = 0;
-                    File file = new File(path, "cat"+counter+".jpg"); // the File to save, append increasing numeric counter to prevent files from getting overwritten.
+                    File file = new File(path, fileName); // the File to save, append increasing numeric counter to prevent files from getting overwritten.
                     fOut = new FileOutputStream(file);
 
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut); // saving the Bitmap to a file compressed as a JPEG with 85% compression rate
@@ -127,13 +113,29 @@ public class AddCatActivity extends AppCompatActivity {
                     fOut.close(); // do not forget to close the stream
 
                     imagePath = file.getAbsolutePath();
-                    MediaStore.Images.Media.insertImage(getContentResolver(),file.getAbsolutePath(),file.getName(),file.getName());
+                    MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
                 }
-
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             Log.v(TAG, "*****USER PICKED AN IMAGE!!!*****");
+        }
+    }
+
+    public boolean isWriteStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG, "Permission is granted");
+                return true;
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+                Log.v(TAG, "Permission is revoked");
+                return false;
+            }
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG, "Permission is granted");
+            return true;
         }
     }
 }

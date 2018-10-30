@@ -20,4 +20,7 @@ public interface CatDao {
 
     @Query("SELECT * FROM cat_table ORDER BY votes DESC")
     LiveData<List<CatEntity>> getAllCats();
+
+    @Query("SELECT COUNT(_id) FROM cat_table")
+    int getNumRows();
 }

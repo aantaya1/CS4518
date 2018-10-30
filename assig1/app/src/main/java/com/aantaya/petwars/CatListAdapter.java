@@ -19,12 +19,14 @@ public class CatListAdapter extends RecyclerView.Adapter<CatListAdapter.CatViewH
     public static final String TAG = "CAT_LIST_ADAPTER";
 
     class CatViewHolder extends RecyclerView.ViewHolder {
+        private final TextView CatRankView;
         private final TextView CatTitleView;
         private final ImageView CatImageView;
         private final TextView CatDescriptionView;
 
         private CatViewHolder(View itemView) {
             super(itemView);
+            CatRankView = itemView.findViewById(R.id.recyclerview_rank);
             CatTitleView = itemView.findViewById(R.id.recyclerview_title);
             CatImageView = itemView.findViewById(R.id.recyclerview_image);
             CatDescriptionView = itemView.findViewById(R.id.recyclerview_desc);
@@ -46,6 +48,7 @@ public class CatListAdapter extends RecyclerView.Adapter<CatListAdapter.CatViewH
     public void onBindViewHolder(CatViewHolder holder, int position) {
         if (mCats != null) {
             CatEntity current = mCats.get(position);
+            holder.CatRankView.setText(String.valueOf(position+1));
             holder.CatTitleView.setText(current.getName());
             holder.CatDescriptionView.setText(current.getDescription());
 
