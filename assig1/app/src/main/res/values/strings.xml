@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">PetWars</string>
+    <string name="vote_text">Vote</string>
+    <string name="vote_image_desc">An image of a CUTE cat</string>
     <string name="leader_board">Leader Board</string>
     <string name="hint_imageid">Number…</string>
     <string name="hint_name">Name of Cat</string>
