@@ -1,10 +1,13 @@
 package com.aantaya.petwars;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aantaya.petwars.Entities.CatEntity;
@@ -13,12 +16,18 @@ import java.util.List;
 
 public class CatListAdapter extends RecyclerView.Adapter<CatListAdapter.CatViewHolder>{
 
+    public static final String TAG = "CAT_LIST_ADAPTER";
+
     class CatViewHolder extends RecyclerView.ViewHolder {
-        private final TextView CatItemView;
+        private final TextView CatTitleView;
+        private final ImageView CatImageView;
+        private final TextView CatDescriptionView;
 
         private CatViewHolder(View itemView) {
             super(itemView);
-            CatItemView = itemView.findViewById(R.id.textView);
+            CatTitleView = itemView.findViewById(R.id.recyclerview_title);
+            CatImageView = itemView.findViewById(R.id.recyclerview_image);
+            CatDescriptionView = itemView.findViewById(R.id.recyclerview_desc);
         }
     }
 
@@ -37,10 +46,17 @@ public class CatListAdapter extends RecyclerView.Adapter<CatListAdapter.CatViewH
     public void onBindViewHolder(CatViewHolder holder, int position) {
         if (mCats != null) {
             CatEntity current = mCats.get(position);
-            holder.CatItemView.setText(current.getName());
+            holder.CatTitleView.setText(current.getName());
+            holder.CatDescriptionView.setText(current.getDescription());
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 8;
+            final Bitmap b = BitmapFactory.decodeFile(current.getImagePath(), options);
+
+            holder.CatImageView.setImageBitmap(b);
         } else {
             // Covers the case of data not being ready yet.
-            holder.CatItemView.setText("No Cat");
+            holder.CatTitleView.setText("No Cat");
         }
     }
 

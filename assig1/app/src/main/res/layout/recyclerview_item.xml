@@ -1,13 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="12dp">
 
-    <TextView
-        android:id="@+id/textView"
-        style="@style/word_title"
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:scaleType="center"
+        android:id="@+id/recyclerview_image"
+        android:contentDescription="@string/recycler_view_image_desc" />
+
+    <TextView
+        android:id="@+id/recyclerview_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textStyle="bold"
         android:background="#bdede0" />
+
+    <TextView
+        android:id="@+id/recyclerview_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:background="#bdede0" />
+
 </LinearLayout>

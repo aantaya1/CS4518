@@ -12,6 +12,8 @@ import java.util.List;
 
 public class CatViewModel extends AndroidViewModel {
 
+    public static final String TAG = "CAT_VIEW_MODEL";
+
     private CatRepository myCatRepository;
     private LiveData<List<CatEntity>> myAllCats;
 

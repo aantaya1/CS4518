@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/edit_image_id"
+    <ImageView
+        android:id="@+id/cat_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignParentRight="true"
+        android:scaleType="centerInside"
+        android:gravity="center"
+        android:padding="15px"
+        />
+
+    <Button
+        android:id="@+id/upload_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/hint_imageid"
-        android:fontFamily="sans-serif-light"
-        android:ems="10"
-        android:textSize="18sp"
-        android:padding="@dimen/small_padding"
-        android:layout_marginBottom="@dimen/big_padding"
-        android:layout_marginTop="@dimen/big_padding"
-        android:inputType="number" />
+        android:text="Load Image from Gallery" />
 
     <EditText
         android:id="@+id/edit_cat_name"

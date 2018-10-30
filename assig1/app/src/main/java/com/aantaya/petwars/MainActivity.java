@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     private CatViewModel catViewModel;
     public static final int NEW_WORD_ACTIVITY_REQUEST_CODE = 1;
+    public static final String TAG = "MAIN_ACTIVITY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +58,11 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == NEW_WORD_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-            Long imageid = 10L;
+            String imagePath = data.getStringExtra(AddCatActivity.EXTRA_IMAGE_PATH);
             String name = data.getStringExtra(AddCatActivity.EXTRA_NAME);
             String desc = data.getStringExtra(AddCatActivity.EXTRA_DESC);
 
-            CatEntity cat = new CatEntity(imageid, 0, name, desc);
+            CatEntity cat = new CatEntity(imagePath, 0, name, desc);
             catViewModel.insert(cat);
         } else {
             Toast.makeText(

@@ -11,6 +11,9 @@ import com.aantaya.petwars.Entities.CatEntity;
 import java.util.List;
 
 public class CatRepository {
+
+    public static final String TAG = "CAT_REPOSITORY";
+
     private CatDao myCatDao;
     private LiveData<List<CatEntity>> myAllCats;
 

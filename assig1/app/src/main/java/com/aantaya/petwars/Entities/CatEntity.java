@@ -8,14 +8,16 @@ import android.support.annotation.NonNull;
 @Entity(tableName = "cat_table")
 public class CatEntity {
 
+    public static final String TAG = "CAT_ENTITY";
+
     @PrimaryKey(autoGenerate = true)
     @NonNull
     @ColumnInfo(name = "_id")
     private int _id;
 
     @NonNull
-    @ColumnInfo(name = "imageId")
-    private long imageId;
+    @ColumnInfo(name = "imagePath")
+    private String imagePath;
 
     @NonNull
     @ColumnInfo(name = "votes")
@@ -30,8 +32,8 @@ public class CatEntity {
     private String description;
 
     //Default Constructor
-    public CatEntity(@NonNull long imageId, @NonNull long votes, @NonNull String name, @NonNull String description) {
-        this.imageId = imageId;
+    public CatEntity(@NonNull String imagePath, @NonNull long votes, @NonNull String name, @NonNull String description) {
+        this.imagePath = imagePath;
         this.votes = votes;
         this.name = name;
         this.description = description;
@@ -45,8 +47,8 @@ public class CatEntity {
     public void set_id(int id) { id = id; }
 
     @NonNull
-    public long getImageId() { return imageId; }
-    public void setImageId(@NonNull long imageId) { this.imageId = imageId; }
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(@NonNull String imagePath) { this.imagePath = imagePath; }
 
     @NonNull
     public long getVotes() { return votes; }

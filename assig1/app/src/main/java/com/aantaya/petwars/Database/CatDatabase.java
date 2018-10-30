@@ -39,8 +39,8 @@ public abstract class CatDatabase extends RoomDatabase{
             new RoomDatabase.Callback(){
 
                 @Override
-                public void onOpen (@NonNull SupportSQLiteDatabase db){
-                    super.onOpen(db);
+                public void onCreate (@NonNull SupportSQLiteDatabase db){
+                    super.onCreate(db);
                     new PopulateDbAsync(INSTANCE).execute();
                 }
             };
@@ -53,13 +53,13 @@ public abstract class CatDatabase extends RoomDatabase{
 
         @Override
         protected Void doInBackground(final Void... params) {
-            CatEntity cat = new CatEntity(1, 0, "Fluffy", "TestDescription");
-            Log.d("CATDATABASE", "Adding cat to db:" + "Fluffy");
-            mDao.insert(cat);
-
-            cat = new CatEntity(2, 0, "Snuffles", "AnotherTestDescription");
-            Log.d("CATDATABASE", "Adding cat to db:" + "Snuffles");
-            mDao.insert(cat);
+//            CatEntity cat = new CatEntity(1, 0, "Fluffy", "TestDescription");
+//            Log.d("CATDATABASE", "Adding cat to db:" + "Fluffy");
+//            mDao.insert(cat);
+//
+//            cat = new CatEntity(2, 0, "Snuffles", "AnotherTestDescription");
+//            Log.d("CATDATABASE", "Adding cat to db:" + "Snuffles");
+//            mDao.insert(cat);
 
             return null;
         }
