@@ -56,11 +56,11 @@ public abstract class CatDatabase extends RoomDatabase{
 
         @Override
         protected Void doInBackground(final Void... params) {
-            CatEntity cat = new CatEntity("", 0, "Fluffy", "TestDescription");
-            mDao.insert(cat);
-
-            cat = new CatEntity("", 0, "Snuffles", "AnotherTestDescription");
-            mDao.insert(cat);
+//            CatEntity cat = new CatEntity("", 0, "Fluffy", "TestDescription");
+//            mDao.insert(cat);
+//
+//            cat = new CatEntity("", 0, "Snuffles", "AnotherTestDescription");
+//            mDao.insert(cat);
 
             return null;
         }

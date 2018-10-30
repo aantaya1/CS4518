@@ -38,12 +38,15 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     public static final int NEW_CAT_ACTIVITY_REQUEST_CODE = 1;
+    public static final int HAVE_PERMISSION = 2;
     public static final String TAG = "MAIN_ACTIVITY";
-    public int numRows;
+    public final String PREFS_NAME = "MyPrefsFile";
+    public final String FIRST_TIME_STRING = "first_time";
 
     private CatViewModel catViewModel;
 
-    final String PREFS_NAME = "MyPrefsFile";
+    File file1; // the File to save, append increasing numeric counter to prevent files from getting overwritten.
+    File file2;
 
     SharedPreferences settings;
 
@@ -67,9 +70,13 @@ public class MainActivity extends AppCompatActivity {
             Log.v(TAG, "Permission is granted");
         }
 
+        catViewModel = ViewModelProviders.of(this).get(CatViewModel.class);
+
         //This will only execute in the first time the application runs...This will create two cats
         //for TA grading...
-        if (settings.getBoolean("my_first_time", true) != false) {
+        Log.v(TAG, "****Settings value: " + settings.getBoolean(FIRST_TIME_STRING, true));
+
+        if (settings.getBoolean(FIRST_TIME_STRING, true)) {
             //the app is being launched for first time, do something
             Log.d(TAG, "First time");
 
@@ -102,8 +109,8 @@ public class MainActivity extends AppCompatActivity {
             Log.v(TAG, "Saving Image = " + fileName2);
             Log.v(TAG, "Location = " + path);
             OutputStream fOut = null;
-            File file1 = new File(path, fileName1); // the File to save, append increasing numeric counter to prevent files from getting overwritten.
-            File file2 = new File(path, fileName2);
+            file1 = new File(path, fileName1); // the File to save, append increasing numeric counter to prevent files from getting overwritten.
+            file2 = new File(path, fileName2);
             try {
                 fOut = new FileOutputStream(file1);
             } catch (FileNotFoundException e) {
@@ -131,21 +138,23 @@ public class MainActivity extends AppCompatActivity {
             imagePath1 = file1.getAbsolutePath();
             imagePath2 = file2.getAbsolutePath();
 
-            try {
-                MediaStore.Images.Media.insertImage(getContentResolver(), file1.getAbsolutePath(), file1.getName(), file1.getName());
-                MediaStore.Images.Media.insertImage(getContentResolver(), file2.getAbsolutePath(), file2.getName(), file2.getName());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+            Log.v(TAG, "Image1 Path: " + imagePath1);
+            Log.v(TAG, "Image2 Path: " + imagePath2);
 
             CatEntity cat1 = new CatEntity(imagePath1, 0, "Fluffy", "The cutest cat ever!");
             CatEntity cat2 = new CatEntity(imagePath2, 0, "Snuffles", "A really cute cat :) !");
 
-            // record the fact that the app has been started at least once
-            settings.edit().putBoolean("my_first_time", false).apply();
-        }
+            catViewModel.insert(cat1);
+            catViewModel.insert(cat2);
 
-        catViewModel = ViewModelProviders.of(this).get(CatViewModel.class);
+            Toast.makeText(
+                    getApplicationContext(),
+                    R.string.on_init,
+                    Toast.LENGTH_LONG).show();
+
+            // record the fact that the app has been started at least once
+            settings.edit().putBoolean(FIRST_TIME_STRING, false).apply();
+        }
 
         final CatListAdapter adapter = new CatListAdapter(this);
 
@@ -169,6 +178,24 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, NEW_CAT_ACTIVITY_REQUEST_CODE);
             }
         });
+    }
+
+    //This is a callback from the dialog presented to the user. The images can only be written to storage
+    //  if the user allows us to write to external storage
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        Log.v(TAG, "Permission Callback, Request Code: " + requestCode);
+        for(String s : permissions){ Log.v(TAG, "Permission Callback, permission added : " + s); }
+        if(requestCode == 2){
+            try {
+                MediaStore.Images.Media.insertImage(getContentResolver(), file1.getAbsolutePath(), file1.getName(), file1.getName());
+                MediaStore.Images.Media.insertImage(getContentResolver(), file2.getAbsolutePath(), file2.getName(), file2.getName());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }else{
+            
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
