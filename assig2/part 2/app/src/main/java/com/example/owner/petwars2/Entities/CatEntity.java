@@ -2,6 +2,7 @@ package com.example.owner.petwars2.Entities;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
@@ -31,7 +32,20 @@ public class CatEntity {
     @ColumnInfo(name = "description")
     private String description;
 
+    @ColumnInfo(name = "location")
+    private String location;
+
     //Default Constructor
+    public CatEntity(@NonNull String imagePath, @NonNull long votes, @NonNull String name, @NonNull String description, String location) {
+        this.imagePath = imagePath;
+        this.votes = votes;
+        this.name = name;
+        this.description = description;
+        this.location = location;
+    }
+
+    //Constructor if we fail to record location
+    @Ignore
     public CatEntity(@NonNull String imagePath, @NonNull long votes, @NonNull String name, @NonNull String description) {
         this.imagePath = imagePath;
         this.votes = votes;
@@ -40,7 +54,6 @@ public class CatEntity {
     }
 
     //Getters and setters for manipulating the model
-
     @NonNull
     public int get_id() { return _id; }
     //Required to have a setter for each field, however, doesn't make sense for _id so I made it do nothing
@@ -61,4 +74,7 @@ public class CatEntity {
     @NonNull
     public String getDescription() { return description; }
     public void setDescription(@NonNull String description) { this.description = description; }
+
+    public String getLocation() { return location; }
+    public void setLocation(@NonNull String location) { this.location = location; }
 }

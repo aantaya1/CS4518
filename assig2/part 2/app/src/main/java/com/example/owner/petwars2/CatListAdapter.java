@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ public class CatListAdapter extends RecyclerView.Adapter<CatListAdapter.CatViewH
         private final TextView CatTitleView;
         private final ImageView CatImageView;
         private final TextView CatDescriptionView;
+        private final TextView CatLocationView;
 
         private CatViewHolder(View itemView) {
             super(itemView);
@@ -30,6 +32,7 @@ public class CatListAdapter extends RecyclerView.Adapter<CatListAdapter.CatViewH
             CatTitleView = itemView.findViewById(R.id.recyclerview_title);
             CatImageView = itemView.findViewById(R.id.recyclerview_image);
             CatDescriptionView = itemView.findViewById(R.id.recyclerview_desc);
+            CatLocationView = itemView.findViewById(R.id.recyclerview_location);
         }
     }
 
@@ -51,6 +54,10 @@ public class CatListAdapter extends RecyclerView.Adapter<CatListAdapter.CatViewH
             holder.CatRankView.setText(String.valueOf(position+1));
             holder.CatTitleView.setText(current.getName());
             holder.CatDescriptionView.setText(current.getDescription());
+            if(current.getLocation() != null){
+                holder.CatLocationView.setText(current.getLocation());
+                Log.v(TAG, "View Location: " + current.getLocation());
+            }else Log.v(TAG, "View location was null");
 
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 8;
@@ -76,5 +83,4 @@ public class CatListAdapter extends RecyclerView.Adapter<CatListAdapter.CatViewH
             return mCats.size();
         else return 0;
     }
-
 }

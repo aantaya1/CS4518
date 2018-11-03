@@ -36,7 +36,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     public static final int NEW_CAT_ACTIVITY_REQUEST_CODE = 1;
-    public static final int HAVE_PERMISSION = 2;
+    public static final int STORAGE_PERMISSION = 2;
+    public static final int LOCATION_PERMISSION = 1;
     public static final String TAG = "MAIN_ACTIVITY";
     public final String PREFS_NAME = "MyPrefsFile";
     public final String FIRST_TIME_STRING = "first_time";
@@ -58,10 +59,10 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-                Log.v(TAG, "Permission is granted");
+                Log.v(TAG, "Storage permission is granted!");
             } else {
                 ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION);
                 Log.v(TAG, "Permission is revoked");
             }
         } else { //permission is automatically granted on sdk<23 upon installation
@@ -139,8 +140,8 @@ public class MainActivity extends AppCompatActivity {
             Log.v(TAG, "Image1 Path: " + imagePath1);
             Log.v(TAG, "Image2 Path: " + imagePath2);
 
-            CatEntity cat1 = new CatEntity(imagePath1, 0, "Fluffy", "The cutest cat ever!");
-            CatEntity cat2 = new CatEntity(imagePath2, 0, "Snuffles", "A really cute cat :) !");
+            CatEntity cat1 = new CatEntity(imagePath1, 0, "Fluffy", "The cutest cat ever!", "42.2704532, -71.8039228");
+            CatEntity cat2 = new CatEntity(imagePath2, 0, "Snuffles", "A really cute cat :) !", "42.2704639, -71.8032579");
 
             catViewModel.insert(cat1);
             catViewModel.insert(cat2);
@@ -182,14 +183,28 @@ public class MainActivity extends AppCompatActivity {
     //  if the user allows us to write to external storage
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        Log.v(TAG, "Permission Callback, Request Code: " + requestCode);
         for(String s : permissions){ Log.v(TAG, "Permission Callback, permission added : " + s); }
-        if(requestCode == 2){
+
+        if(requestCode == STORAGE_PERMISSION){
             try {
                 MediaStore.Images.Media.insertImage(getContentResolver(), file1.getAbsolutePath(), file1.getName(), file1.getName());
                 MediaStore.Images.Media.insertImage(getContentResolver(), file2.getAbsolutePath(), file2.getName(), file2.getName());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
+            }
+
+            // check permission
+            if (ActivityCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // request for permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_PERMISSION);
+                Log.v(TAG, "Location permission is granted!");
+            }else{
+                Log.v(TAG, "Location permission is NOT granted!");
             }
         }
     }
@@ -201,8 +216,9 @@ public class MainActivity extends AppCompatActivity {
             String imagePath = data.getStringExtra(AddCatActivity.EXTRA_IMAGE_PATH);
             String name = data.getStringExtra(AddCatActivity.EXTRA_NAME);
             String desc = data.getStringExtra(AddCatActivity.EXTRA_DESC);
+            String loc = data.getStringExtra(AddCatActivity.EXTRA_LOCATION);
 
-            CatEntity cat = new CatEntity(imagePath, 0, name, desc);
+            CatEntity cat = new CatEntity(imagePath, 0, name, desc, loc);
             catViewModel.insert(cat);
         } else {
             Toast.makeText(
