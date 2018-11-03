@@ -61,7 +61,6 @@ public class AddCatActivity extends AppCompatActivity {
         takePicture.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            String photoURI;
 
             List<ResolveInfo> activities = getPackageManager().queryIntentActivities(intent, 0);
 
@@ -72,17 +71,12 @@ public class AddCatActivity extends AppCompatActivity {
                     String path = dir.toString();
                     long count = dir.listFiles().length+1;
                     String fileName = "cat" + count + ".jpg";
-                    photoURI = path + fileName;
-                    Log.v(TAG, "@@@@@photoURI: " + photoURI);
 
                     File mFile = new File(path, fileName);
                     imagePath = mFile.getAbsolutePath();
-                    Log.v(TAG, "@@@@@mFile.getAbsolutePath(): " + mFile.getAbsolutePath());
                     Uri mUri = FileProvider.getUriForFile(getApplicationContext(),
                             "com.example.owner.petwars2.fileprovider", mFile);
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, mUri);
-
-                    Log.v(TAG, "mFile.absPath(): " + mFile.getAbsolutePath());
                     startActivityForResult(intent, TAKE_IMAGE);
                 }
             }else {
@@ -138,34 +132,28 @@ public class AddCatActivity extends AppCompatActivity {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 myImageCatView.setImageBitmap(bitmap);
-                boolean temp = isWriteStoragePermissionGranted();
-                Log.v(TAG, "*****Permissions: " + temp);
-                if (temp) {
+
+                if (isWriteStoragePermissionGranted()) {
                     // Assume block needs to be inside a Try/Catch block.
-                    File dir = new File(getApplicationContext().getFilesDir()+File.separator+"images");
+                    File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                     dir.mkdir();
                     String path = dir.toString();
                     long count = dir.listFiles().length+1;
                     String fileName = "cat" + count + ".jpg";
-                    Log.v(TAG, "Saving Image = " + fileName);
-                    Log.v(TAG, "Location = " + path);
-                    OutputStream fOut = null;
-                    File file = new File(path, fileName); // the File to save, append increasing numeric counter to prevent files from getting overwritten.
-                    fOut = new FileOutputStream(file);
+
+                    File file = new File(path, fileName);
+                    imagePath = file.getAbsolutePath(); // the File to save, append increasing numeric counter to prevent files from getting overwritten.
+                    OutputStream fOut = new FileOutputStream(file);
 
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut); // saving the Bitmap to a file compressed as a JPEG with 85% compression rate
                     fOut.flush(); // Not really required
                     fOut.close(); // do not forget to close the stream
 
-                    Log.v(TAG, "#####Saving image to: " + file.getAbsolutePath());
-
-                    imagePath = file.getAbsolutePath();
                     MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Log.v(TAG, "*****USER PICKED AN IMAGE!!!*****");
         }
     }
 
