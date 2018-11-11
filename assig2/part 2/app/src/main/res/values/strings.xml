@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">PetWars2</string>
+    <string name="vote_text">Vote</string>
+    <string name="vote_image_desc">An image of a CUTE cat</string>
+    <string name="leader_board">Leader Board</string>
+    <string name="hint_imageid">Number…</string>
+    <string name="hint_name">Name of Cat</string>
+    <string name="hint_desc">Description for Cat</string>
+    <string name="button_save">Save</string>
+    <string name="empty_not_saved">Not Saved: A Required Field Was Empty</string>
+    <string name="on_init">First time start: Created two cats</string>
+    <string name="recycler_view_image_desc">Temp Image of Cat</string>
+    <string name="get_gallery_image">Load From Gallery</string>
+    <string name="get_camera_image">Take Picture</string>
+    <string name="no_camera_found">Error: No Camera Found</string>
+</resources>

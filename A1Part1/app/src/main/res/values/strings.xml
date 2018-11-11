@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">A1Part1</string>
+    <string name="main_button">Next Image</string>
+    <string name="main_image_desc">Cat Image</string>
+</resources>
