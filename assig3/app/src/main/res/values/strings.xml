@@ -9,9 +9,7 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
@@ -28,4 +26,21 @@
     <string name="fresh_config">Fresh Config</string>
     <string name="cause_crash">Cause Crash</string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+
+    <string name="vote_text">Vote</string>
+    <string name="image_title">Image Title</string>
+    <string name="image_desc">Here is where a description of the image would be placed. An example
+        description could be: "This image was taken on the second day of the Salkantay trek."</string>
+    <string name="leader_board">Leader Board</string>
+    <string name="hint_imageid">Number…</string>
+    <string name="hint_name">Name of Image</string>
+    <string name="hint_desc">Description for Image</string>
+    <string name="button_save">Save</string>
+    <string name="empty_not_saved">Not Saved: A Required Field Was Empty</string>
+    <string name="on_init">First time start: Created two Images</string>
+    <string name="recycler_view_image_desc">Temp Image of Image</string>
+    <string name="get_gallery_image">Load From Gallery</string>
+    <string name="get_camera_image">Take Picture</string>
+    <string name="no_camera_found">Error: No Camera Found</string>
+    <string name="vote_image_desc">A user defined image</string>
 </resources>
