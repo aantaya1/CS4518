@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -29,6 +30,7 @@ public class SignInActivity extends AppCompatActivity implements
     private static final int RC_SIGN_IN = 9001;
 
     private SignInButton mSignInButton;
+    private ProgressBar mProgressbar;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -44,6 +46,7 @@ public class SignInActivity extends AppCompatActivity implements
 
         // Assign fields
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
+        mProgressbar = findViewById(R.id.sign_in_loading);
 
         // Set click listeners
         mSignInButton.setOnClickListener(this);
@@ -66,6 +69,7 @@ public class SignInActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sign_in_button:
+                mProgressbar.setVisibility(View.VISIBLE);
                 signIn();
                 break;
         }
