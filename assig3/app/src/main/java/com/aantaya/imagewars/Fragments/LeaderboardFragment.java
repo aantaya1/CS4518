@@ -1,10 +1,12 @@
-package com.aantaya.imagewars;
+package com.aantaya.imagewars.Fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.aantaya.imagewars.R;
 
 public class LeaderboardFragment extends Fragment {
 

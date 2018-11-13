@@ -4,6 +4,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.aantaya.imagewars.Fragments.LeaderboardFragment;
+import com.aantaya.imagewars.Fragments.UsersImagesFragment;
+import com.aantaya.imagewars.Fragments.VoteFragment;
+
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     public SectionsPagerAdapter(FragmentManager fm) {

@@ -2,23 +2,42 @@ package com.aantaya.imagewars;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.aantaya.imagewars.Models.ImageModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +50,7 @@ public class AddImageActivity extends AppCompatActivity {
     public static final String EXTRA_LOCATION = "location";
     public static final String TAG = "ADD_CAT_ACTIVITY";
     private static final int CAMERA_REQUEST = 1888;
+    private static final int GALLERY_REQUEST = 1789;
 
     public static final int PICK_IMAGE = 1;
     public static final int TAKE_IMAGE = 2;
@@ -38,11 +58,16 @@ public class AddImageActivity extends AppCompatActivity {
     private EditText myEditNameView;
     private EditText myEditDescView;
     private ImageView myImageCatView;
+    private ProgressBar myProgressBar;
     private Button upload;
     private Button takePicture;
     private Button saveButton;
 
     private String imagePath;
+
+    private StorageReference mStorageRef;
+    private DatabaseReference mDatabaseRef;
+    private Uri mUri;
 
     //Location will be stored as a lat & long separated by a comma
     private String mLocation;
@@ -55,11 +80,16 @@ public class AddImageActivity extends AppCompatActivity {
 
         fusedLocation = LocationServices.getFusedLocationProviderClient(this);
 
+        mStorageRef = FirebaseStorage.getInstance().getReference("uploads");
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference("uploads");
+
         getLocation();
 
         myEditNameView = findViewById(R.id.edit_image_name);
         myEditDescView = findViewById(R.id.edit_image_desc);
         myImageCatView = findViewById(R.id.add_image);
+        //TODO: Add progress bar to layout and then bind view here
+        //myProgressBar = findViewById(R.id.upload_progress_bar);
 
         takePicture = findViewById(R.id.capture_image);
         takePicture.setOnClickListener(view -> {
@@ -78,7 +108,7 @@ public class AddImageActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), GALLERY_REQUEST);
         });
 
         saveButton = findViewById(R.id.button_save);
@@ -87,14 +117,7 @@ public class AddImageActivity extends AppCompatActivity {
             if (TextUtils.isEmpty(myEditNameView.getText()) || TextUtils.isEmpty(myEditDescView.getText())) {
                 setResult(RESULT_CANCELED, replyIntent);
             } else {
-                String name = myEditNameView.getText().toString();
-                String desc = myEditDescView.getText().toString();
-
-                replyIntent.putExtra(EXTRA_IMAGE_PATH, imagePath);
-                replyIntent.putExtra(EXTRA_NAME, name);
-                replyIntent.putExtra(EXTRA_DESC, desc);
-                if (mLocation != null) replyIntent.putExtra(EXTRA_LOCATION, mLocation);
-                setResult(RESULT_OK, replyIntent);
+                uploadFile();
             }
             finish();
         });
@@ -104,14 +127,14 @@ public class AddImageActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == TAKE_IMAGE) {
-            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-            myImageCatView.setImageBitmap(bitmap);
+        if (requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK) {
+            mUri = data.getData();
+            Picasso.with(this).load(mUri).into(myImageCatView);
         }
 
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            myImageCatView.setImageBitmap(bitmap);
+            mUri = data.getData();
+            Picasso.with(this).load(mUri).into(myImageCatView);
         }
     }
 
@@ -132,4 +155,36 @@ public class AddImageActivity extends AppCompatActivity {
         }
     }
 
+    public String getFileExtention(Uri mUri){
+        ContentResolver mContent = getContentResolver();
+        MimeTypeMap mMime = MimeTypeMap.getSingleton();
+        return mMime.getExtensionFromMimeType(mContent.getType(mUri));
+    }
+
+    public void uploadFile(){
+        if(mUri != null){
+            StorageReference fileReference = mStorageRef.child(System.currentTimeMillis() + "." + getFileExtention(mUri));
+
+            fileReference.putFile(mUri).continueWithTask(task -> {
+                if(!task.isSuccessful()) throw task.getException();
+                return fileReference.getDownloadUrl();
+            }).addOnCompleteListener(task -> {
+                if (task.isSuccessful()){
+                    Toast.makeText(AddImageActivity.this, "Upload Successful", Toast.LENGTH_SHORT).show();
+                    String title = myEditNameView.getText().toString().trim();
+                    String desc = myEditDescView.getText().toString().trim();
+                    String location = mLocation;
+                    String imageUrl = task.getResult().toString();
+                    Log.d(TAG, "Successful Upload URI: " + imageUrl);
+
+                    ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location);
+                    String id = mDatabaseRef.push().getKey();
+                    mDatabaseRef.child(id).setValue(mImageModel);
+                }else {
+                    Toast.makeText(this, "Upload failed: " + task.getException() ,
+                            Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
 }
