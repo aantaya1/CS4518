@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginStart="5dp"
+        android:backgroundTint= "#F8F0FB">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/recyclerview_rank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:gravity="center"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:textColor="#000000"
+                android:text="1"/>
+
+            <ImageView
+                android:id="@+id/recyclerview_image"
+                android:layout_width="120dp"
+                android:layout_height="90dp"
+                android:layout_toEndOf="@id/recyclerview_rank"
+                android:padding="4dp"
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/recycler_view_image_desc" />
+            <TextView
+                android:id="@+id/recyclerview_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_toEndOf="@id/recyclerview_image"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:textColor="#000000"
+                android:text="@string/image_title"/>
+            <TextView
+                android:id="@+id/recyclerview_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/recyclerview_title"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="0dp"
+                android:layout_toEndOf="@id/recyclerview_image"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
+            <TextView
+                android:id="@+id/recyclerview_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/recyclerview_location"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_toEndOf="@id/recyclerview_image"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Body1"
+                android:text="@string/image_desc"/>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

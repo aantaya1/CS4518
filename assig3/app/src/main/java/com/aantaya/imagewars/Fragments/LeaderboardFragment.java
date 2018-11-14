@@ -6,7 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.aantaya.imagewars.Models.ImageModel;
 import com.aantaya.imagewars.R;
+
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.DatabaseReference;
 
 public class LeaderboardFragment extends Fragment {
 
@@ -24,14 +29,16 @@ public class LeaderboardFragment extends Fragment {
      */
     public static LeaderboardFragment newInstance() {
         LeaderboardFragment fragment = new LeaderboardFragment();
+
+
+
         return fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_my_images, container, false);
         return rootView;
     }
-
 }

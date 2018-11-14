@@ -21,9 +21,9 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         if (position == 0)
             return VoteFragment.newInstance();
         else if (position == 1)
-            return LeaderboardFragment.newInstance();
-        else
             return UsersImagesFragment.newInstance();
+        else
+            return LeaderboardFragment.newInstance();
     }
 
     @Override
@@ -31,5 +31,4 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         // Show 3 total pages.
         return 3;
     }
-
 }
