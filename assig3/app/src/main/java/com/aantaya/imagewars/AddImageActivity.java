@@ -173,7 +173,7 @@ public class AddImageActivity extends AppCompatActivity {
                     String imageUrl = task.getResult().toString();
                     Log.d(TAG, "Successful Upload URI: " + imageUrl);
 
-                    ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location);
+                    ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0);
                     String id = mDatabaseRef.push().getKey();
                     mDatabaseRef.child(id).setValue(mImageModel);
                 }else {

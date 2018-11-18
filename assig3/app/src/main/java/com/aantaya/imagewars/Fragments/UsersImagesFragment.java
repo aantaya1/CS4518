@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -83,7 +84,7 @@ public class UsersImagesFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        Query q = mDb.child(DATABASE_NAME);
+        Query q = mDb.child(DATABASE_NAME).orderByChild("voteCount");
 
         FirebaseRecyclerOptions<ImageModel> options =
                 new FirebaseRecyclerOptions.Builder<ImageModel>()
@@ -93,10 +94,10 @@ public class UsersImagesFragment extends Fragment {
         adapter = new FirebaseRecyclerAdapter <ImageModel, MImageHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull MImageHolder holder, int position, @NonNull ImageModel model) {
-                holder.rank.setText(String.valueOf(position + 1));
                 holder.title.setText(model.getTitle());
                 holder.description.setText(model.getDescription());
                 holder.location.setText(model.getLocation());
+                holder.voteCount.setText("Number of Votes: " + String.valueOf(model.getVoteCount()));
                 Picasso.with(getContext()).load(model.getImageUrl()).into(holder.image);
             }
 
@@ -118,7 +119,10 @@ public class UsersImagesFragment extends Fragment {
         });
 
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        manager.setReverseLayout(true);
+        manager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
         adapter.startListening();
     }
@@ -130,20 +134,20 @@ public class UsersImagesFragment extends Fragment {
     }
 
     public static class MImageHolder extends RecyclerView.ViewHolder{
-        TextView rank;
         ImageView image;
         TextView title;
         TextView description;
         TextView location;
+        TextView voteCount;
 
         MImageHolder(@NonNull View itemView) {
             super(itemView);
 
-            rank = itemView.findViewById(R.id.recyclerview_rank);
             image = itemView.findViewById(R.id.recyclerview_image);
             title = itemView.findViewById(R.id.recyclerview_title);
             description = itemView.findViewById(R.id.recyclerview_desc);
             location = itemView.findViewById(R.id.recyclerview_location);
+            voteCount = itemView.findViewById(R.id.recyclerview_votes);
         }
     }
 }

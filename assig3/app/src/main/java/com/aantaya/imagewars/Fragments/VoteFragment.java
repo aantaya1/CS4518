@@ -101,13 +101,15 @@ public class VoteFragment extends Fragment {
                     Log.v(TAG, "DataSnapshot: " + dataSnapshot.toString());
                     for (DataSnapshot postSnapshot : dataSnapshot.child("uploads").getChildren()) {
                         ImageModel upload = postSnapshot.getValue(ImageModel.class);
-                        Log.v(TAG, "Image Title: " + upload.getTitle());
+                        upload.setUid(postSnapshot.getKey());
+                        Log.v(TAG, "Image UUID: " + postSnapshot.getKey());
                         mImageModels.add(upload);
                     }
-                    titleText.setText(mImageModels.get(currImage).getTitle());
-                    descriptionText.setText(mImageModels.get(currImage).getDescription());
-                    Picasso.with(getContext()).load(mImageModels.get(currImage).getImageUrl()).fit().centerCrop().into(image);
-                    //currImage++;
+                    if(mImageModels.size() >= 1){
+                        titleText.setText(mImageModels.get(currImage).getTitle());
+                        descriptionText.setText(mImageModels.get(currImage).getDescription());
+                        Picasso.with(getContext()).load(mImageModels.get(currImage).getImageUrl()).fit().centerCrop().into(image);
+                    }
                 }else {
                     //TODO: Display text saying there are no images to find
                 }
@@ -120,5 +122,31 @@ public class VoteFragment extends Fragment {
         };
 
         mDb.addListenerForSingleValueEvent(mValueEventListener);
+
+        upVoteButton.setOnClickListener(view -> {
+            String id = mImageModels.get(currImage).getUid();
+            long numVotes = mImageModels.get(currImage).getVoteCount() + 1;
+            ImageModel model = new ImageModel(mImageModels.get(currImage), numVotes);
+            mImageModels.get(currImage).setVoteCount(numVotes);
+            mDb.child(DATABASE_NAME).child(id).setValue(model);
+            nextImage();
+        });
+
+        downVoteButton.setOnClickListener(view -> {
+            String id = mImageModels.get(currImage).getUid();
+            long numVotes = mImageModels.get(currImage).getVoteCount() - 1;
+            ImageModel model = new ImageModel(mImageModels.get(currImage), numVotes);
+            mImageModels.get(currImage).setVoteCount(numVotes);
+            mDb.child(DATABASE_NAME).child(id).setValue(model);
+            nextImage();
+        });
+    }
+
+    public void nextImage(){
+        currImage++;
+        if (currImage >= mImageModels.size()) currImage = 0;
+        titleText.setText(mImageModels.get(currImage).getTitle());
+        descriptionText.setText(mImageModels.get(currImage).getDescription());
+        Picasso.with(getContext()).load(mImageModels.get(currImage).getImageUrl()).fit().centerCrop().into(image);
     }
 }

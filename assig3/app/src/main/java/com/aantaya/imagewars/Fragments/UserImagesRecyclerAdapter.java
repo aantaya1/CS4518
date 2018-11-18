@@ -40,7 +40,6 @@ public class UserImagesRecyclerAdapter extends RecyclerView.Adapter<UserImagesRe
     @Override
     public void onBindViewHolder(@NonNull ImageHolder imageHolder, int i) {
         ImageModel model = mModels.get(i);
-        imageHolder.rank.setText(i);
         Log.d(TAG, "***Title: " + model.getTitle());
         imageHolder.title.setText(model.getTitle());
         imageHolder.description.setText(model.getDescription());
@@ -54,7 +53,6 @@ public class UserImagesRecyclerAdapter extends RecyclerView.Adapter<UserImagesRe
     }
 
     public static class ImageHolder extends RecyclerView.ViewHolder{
-        TextView rank;
         ImageView image;
         TextView title;
         TextView description;
@@ -62,7 +60,6 @@ public class UserImagesRecyclerAdapter extends RecyclerView.Adapter<UserImagesRe
         ImageHolder(@NonNull View itemView) {
             super(itemView);
 
-            rank = itemView.findViewById(R.id.recyclerview_rank);
             image = itemView.findViewById(R.id.recyclerview_image);
             title = itemView.findViewById(R.id.recyclerview_title);
             description = itemView.findViewById(R.id.recyclerview_desc);
