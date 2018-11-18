@@ -83,28 +83,6 @@ public class UsersImagesFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        ValueEventListener mValueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if(dataSnapshot.exists()){
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        ImageModel upload = postSnapshot.getValue(ImageModel.class);
-                        mImageModels.add(upload);
-                    }
-                    progressBar.setVisibility(View.INVISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getActivity(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.INVISIBLE);
-            }
-        };
-
-        mDb.addValueEventListener(mValueEventListener);
-
         Query q = mDb.child(DATABASE_NAME);
 
         FirebaseRecyclerOptions<ImageModel> options =
@@ -118,6 +96,7 @@ public class UsersImagesFragment extends Fragment {
                 holder.rank.setText(String.valueOf(position + 1));
                 holder.title.setText(model.getTitle());
                 holder.description.setText(model.getDescription());
+                holder.location.setText(model.getLocation());
                 Picasso.with(getContext()).load(model.getImageUrl()).into(holder.image);
             }
 
@@ -126,6 +105,7 @@ public class UsersImagesFragment extends Fragment {
             public MImageHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
                 View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item,
                         viewGroup, false);
+                progressBar.setVisibility(View.INVISIBLE);
                 return new MImageHolder(v);
             }
         };
@@ -154,6 +134,7 @@ public class UsersImagesFragment extends Fragment {
         ImageView image;
         TextView title;
         TextView description;
+        TextView location;
 
         MImageHolder(@NonNull View itemView) {
             super(itemView);
@@ -162,6 +143,7 @@ public class UsersImagesFragment extends Fragment {
             image = itemView.findViewById(R.id.recyclerview_image);
             title = itemView.findViewById(R.id.recyclerview_title);
             description = itemView.findViewById(R.id.recyclerview_desc);
+            location = itemView.findViewById(R.id.recyclerview_location);
         }
     }
 }

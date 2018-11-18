@@ -1,6 +1,11 @@
 package com.aantaya.imagewars.Models;
 
+import android.support.annotation.NonNull;
+
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+
+import java.util.Objects;
 
 @IgnoreExtraProperties
 public class ImageModel {
@@ -49,5 +54,36 @@ public class ImageModel {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    @Exclude
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ImageModel)) return false;
+        ImageModel model = (ImageModel) o;
+        return Objects.equals(getTitle(), model.getTitle()) &&
+                Objects.equals(getDescription(), model.getDescription()) &&
+                Objects.equals(getImageUrl(), model.getImageUrl()) &&
+                Objects.equals(getLocation(), model.getLocation());
+    }
+
+    @Exclude
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(getTitle(), getDescription(), getImageUrl(), getLocation());
+    }
+
+    @Exclude
+    @NonNull
+    @Override
+    public String toString() {
+        return "ImageModel{" +
+                "title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", location='" + location + '\'' +
+                '}';
     }
 }

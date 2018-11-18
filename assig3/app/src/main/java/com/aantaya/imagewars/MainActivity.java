@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        //Set page limit to 2 so when we are scrolling through tabs, we don't destroy
+        // a page (Fragment) and need to make an expensive network call to get db contents every time
+        mViewPager.setOffscreenPageLimit(2);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
