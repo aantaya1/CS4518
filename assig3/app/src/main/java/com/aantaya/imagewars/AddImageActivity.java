@@ -44,10 +44,6 @@ import java.util.Locale;
 
 public class AddImageActivity extends AppCompatActivity {
 
-    public static final String EXTRA_IMAGE_PATH = "image_path";
-    public static final String EXTRA_NAME = "name";
-    public static final String EXTRA_DESC = "desc";
-    public static final String EXTRA_LOCATION = "location";
     public static final String TAG = "ADD_CAT_ACTIVITY";
     private static final int CAMERA_REQUEST = 1888;
     private static final int GALLERY_REQUEST = 1789;

@@ -1,5 +1,8 @@
 package com.aantaya.imagewars.Models;
 
+import com.google.firebase.database.IgnoreExtraProperties;
+
+@IgnoreExtraProperties
 public class ImageModel {
     private String title;
     private String description;

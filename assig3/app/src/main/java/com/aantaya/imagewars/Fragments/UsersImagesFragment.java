@@ -36,6 +36,7 @@ public class UsersImagesFragment extends Fragment {
 
     //Constants
     private static final String TAG = "USER_IMAGES_FRAGMENT";
+    private static final String DATABASE_NAME = "uploads";
 
     //UI
     private View rootView;
@@ -44,12 +45,11 @@ public class UsersImagesFragment extends Fragment {
 
     //Firebase
     private static DatabaseReference mDb;
-    //private FirebaseRecyclerAdapter<ImageModel, MImageHolder> adapter;
+    private FirebaseRecyclerAdapter<ImageModel, MImageHolder> adapter;
     private FirebaseAuth mAuth;
     private String userId;
 
     private List<ImageModel> mImageModels;
-    private UserImagesRecyclerAdapter mAdapter;
 
     public UsersImagesFragment() {
     }
@@ -66,23 +66,13 @@ public class UsersImagesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        Log.v(TAG, "#####INSIDE onCreateView()#####");
-
         rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        recyclerView = rootView.findViewById(R.id.mRecyclerView);
+        progressBar = rootView.findViewById(R.id.main_progress_bar);
 
         mAuth = FirebaseAuth.getInstance();
         userId = mAuth.getCurrentUser().getUid();
-
-        mDb = FirebaseDatabase.getInstance().getReference().child("uploads").child(userId);
-
-        recyclerView = rootView.findViewById(R.id.mRecyclerView);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        progressBar = rootView.findViewById(R.id.main_progress_bar);
-
-        if (recyclerView != null ) Log.d(TAG, "RecyclerView = " + recyclerView.toString());
-        else Log.d(TAG, "RecyclerView = NULL");
+        mDb = FirebaseDatabase.getInstance().getReference();
 
         mImageModels = new ArrayList<>();
 
@@ -93,82 +83,85 @@ public class UsersImagesFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        Log.v(TAG,"#####INSIDE onStart()#####");
-
-        mDb.addValueEventListener(new ValueEventListener() {
+        ValueEventListener mValueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.v(TAG, "#####INSIDE onDataChange()#####");
-                Log.v(TAG, "DataSnapShot--> " + dataSnapshot.toString());
 
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Log.v(TAG, "#####FOUND DataSnapshot#####...  " + postSnapshot.toString());
-                    ImageModel upload = postSnapshot.getValue(ImageModel.class);
-                    mImageModels.add(upload);
+                if(dataSnapshot.exists()){
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        ImageModel upload = postSnapshot.getValue(ImageModel.class);
+                        mImageModels.add(upload);
+                    }
+                    progressBar.setVisibility(View.INVISIBLE);
                 }
-
-                mAdapter = new UserImagesRecyclerAdapter(getActivity(), mImageModels);
-
-                recyclerView.setAdapter(mAdapter);
-                progressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.v(TAG, "#####INSIDE onCancelled()#####");
                 Toast.makeText(getActivity(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.INVISIBLE);
             }
+        };
+
+        mDb.addValueEventListener(mValueEventListener);
+
+        Query q = mDb.child(DATABASE_NAME);
+
+        FirebaseRecyclerOptions<ImageModel> options =
+                new FirebaseRecyclerOptions.Builder<ImageModel>()
+                        .setQuery(q, ImageModel.class)
+                        .build();
+
+        adapter = new FirebaseRecyclerAdapter <ImageModel, MImageHolder>(options) {
+            @Override
+            protected void onBindViewHolder(@NonNull MImageHolder holder, int position, @NonNull ImageModel model) {
+                holder.rank.setText(String.valueOf(position + 1));
+                holder.title.setText(model.getTitle());
+                holder.description.setText(model.getDescription());
+                Picasso.with(getContext()).load(model.getImageUrl()).into(holder.image);
+            }
+
+            @NonNull
+            @Override
+            public MImageHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+                View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item,
+                        viewGroup, false);
+                return new MImageHolder(v);
+            }
+        };
+
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+            }
         });
 
-//        FirebaseRecyclerOptions<ImageModel> options =
-//                new FirebaseRecyclerOptions.Builder<ImageModel>()
-//                        .setQuery(mDb, ImageModel.class)
-//                        .build();
-//
-//        adapter = new FirebaseRecyclerAdapter <ImageModel, MImageHolder>(options) {
-//            @Override
-//            protected void onBindViewHolder(@NonNull MImageHolder holder, int position, @NonNull ImageModel model) {
-//                holder.rank.setText(position);
-//                Log.d(TAG, "***Title: " + model.getTitle());
-//                holder.title.setText(model.getTitle());
-//                holder.description.setText(model.getDescription());
-//                Picasso.with(getContext()).load(model.getImageUrl()).into(holder.image);
-//            }
-//
-//            @NonNull
-//            @Override
-//            public MImageHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-//                View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item,
-//                        viewGroup, false);
-//                Log.d(TAG, "***onCreateViewHolder");
-//                return new MImageHolder(v);
-//            }
-//        };
-//
-//        recyclerView.setAdapter(adapter);
-//        adapter.startListening();
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(adapter);
+        adapter.startListening();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        //adapter.stopListening();
+        adapter.stopListening();
     }
 
-//    public static class MImageHolder extends RecyclerView.ViewHolder{
-//        TextView rank;
-//        ImageView image;
-//        TextView title;
-//        TextView description;
-//
-//        MImageHolder(@NonNull View itemView) {
-//            super(itemView);
-//
-//            rank = itemView.findViewById(R.id.recyclerview_rank);
-//            image = itemView.findViewById(R.id.recyclerview_image);
-//            title = itemView.findViewById(R.id.recyclerview_title);
-//            description = itemView.findViewById(R.id.recyclerview_desc);
-//        }
-//    }
+    public static class MImageHolder extends RecyclerView.ViewHolder{
+        TextView rank;
+        ImageView image;
+        TextView title;
+        TextView description;
+
+        MImageHolder(@NonNull View itemView) {
+            super(itemView);
+
+            rank = itemView.findViewById(R.id.recyclerview_rank);
+            image = itemView.findViewById(R.id.recyclerview_image);
+            title = itemView.findViewById(R.id.recyclerview_title);
+            description = itemView.findViewById(R.id.recyclerview_desc);
+        }
+    }
 }
