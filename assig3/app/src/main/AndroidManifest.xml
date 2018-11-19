@@ -34,7 +34,11 @@
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".AddImageActivity"></activity>
+        <activity android:name=".AddImageActivity" />
+
+        <meta-data
+            android:name="com.google.firebase.ml.vision.DEPENDENCIES"
+            android:value="label" />
     </application>
 
 </manifest>

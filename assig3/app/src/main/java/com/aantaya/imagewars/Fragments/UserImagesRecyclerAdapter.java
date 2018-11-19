@@ -23,7 +23,6 @@ public class UserImagesRecyclerAdapter extends RecyclerView.Adapter<UserImagesRe
     private Context mContext;
     private List<ImageModel> mModels;
 
-
     public UserImagesRecyclerAdapter(@NonNull Context context, List<ImageModel> models) {
         mContext = context;
         mModels = models;
@@ -43,6 +42,7 @@ public class UserImagesRecyclerAdapter extends RecyclerView.Adapter<UserImagesRe
         Log.d(TAG, "***Title: " + model.getTitle());
         imageHolder.title.setText(model.getTitle());
         imageHolder.description.setText(model.getDescription());
+        imageHolder.lables.setText(model.getLables());
         //Picasso.with(mContext).load(model.getImageUrl()).into(imageHolder.image);
         Picasso.with(mContext).load(model.getImageUrl()).fit().centerInside().into(imageHolder.image);
     }
@@ -56,6 +56,7 @@ public class UserImagesRecyclerAdapter extends RecyclerView.Adapter<UserImagesRe
         ImageView image;
         TextView title;
         TextView description;
+        TextView lables;
 
         ImageHolder(@NonNull View itemView) {
             super(itemView);
@@ -63,6 +64,7 @@ public class UserImagesRecyclerAdapter extends RecyclerView.Adapter<UserImagesRe
             image = itemView.findViewById(R.id.recyclerview_image);
             title = itemView.findViewById(R.id.recyclerview_title);
             description = itemView.findViewById(R.id.recyclerview_desc);
+            lables = itemView.findViewById(R.id.recyclerview_lables);
         }
     }
 }

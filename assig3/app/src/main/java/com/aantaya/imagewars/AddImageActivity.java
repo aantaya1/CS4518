@@ -33,12 +33,17 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+import com.google.firebase.ml.vision.label.FirebaseVisionLabel;
+import com.google.firebase.ml.vision.label.FirebaseVisionLabelDetector;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -65,6 +70,9 @@ public class AddImageActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseRef;
     private Uri mUri;
 
+    private FirebaseVisionLabelDetector detector;
+    private FirebaseVisionImage firebaseVisionImage;
+
     //Location will be stored as a lat & long separated by a comma
     private String mLocation;
     private FusedLocationProviderClient fusedLocation;
@@ -78,6 +86,8 @@ public class AddImageActivity extends AppCompatActivity {
 
         mStorageRef = FirebaseStorage.getInstance().getReference("uploads");
         mDatabaseRef = FirebaseDatabase.getInstance().getReference("uploads");
+
+        detector = FirebaseVision.getInstance().getVisionLabelDetector();
 
         getLocation();
 
@@ -161,23 +171,50 @@ public class AddImageActivity extends AppCompatActivity {
         if(mUri != null){
             StorageReference fileReference = mStorageRef.child(System.currentTimeMillis() + "." + getFileExtention(mUri));
 
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mUri);
+                firebaseVisionImage = FirebaseVisionImage.fromBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             fileReference.putFile(mUri).continueWithTask(task -> {
                 if(!task.isSuccessful()) throw task.getException();
                 return fileReference.getDownloadUrl();
-            }).addOnCompleteListener(task -> {
-                if (task.isSuccessful()){
-                    Toast.makeText(AddImageActivity.this, "Upload Successful", Toast.LENGTH_SHORT).show();
-                    String title = myEditNameView.getText().toString().trim();
-                    String desc = myEditDescView.getText().toString().trim();
-                    String location = mLocation;
-                    String imageUrl = task.getResult().toString();
-                    Log.d(TAG, "Successful Upload URI: " + imageUrl);
+            }).addOnCompleteListener(taskA -> {
+                if (taskA.isSuccessful()){
+                    Task<List<FirebaseVisionLabel>> result =
+                            detector.detectInImage(firebaseVisionImage)
+                                    .addOnSuccessListener( labels -> {
+                                                StringBuilder mLables = new StringBuilder();
+                                                for (FirebaseVisionLabel l : labels) mLables.append(l.getLabel()).append(", ");
 
-                    ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0);
-                    String id = mDatabaseRef.push().getKey();
-                    mDatabaseRef.child(id).setValue(mImageModel);
+                                                String title = myEditNameView.getText().toString().trim();
+                                                String desc = myEditDescView.getText().toString().trim();
+                                                String location = mLocation;
+                                                String imageUrl = taskA.getResult().toString();
+                                                Log.d(TAG, "Successful Upload URI: " + imageUrl);
+
+                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString());
+                                                String id = mDatabaseRef.push().getKey();
+                                                mDatabaseRef.child(id).setValue(mImageModel);
+                                                Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
+                                            })
+                                    .addOnFailureListener( e -> {
+                                                String mLables = "N/A";
+                                                String title = myEditNameView.getText().toString().trim();
+                                                String desc = myEditDescView.getText().toString().trim();
+                                                String location = mLocation;
+                                                String imageUrl = taskA.getResult().toString();
+                                                Log.d(TAG, "Successful Upload URI: " + imageUrl);
+
+                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables);
+                                                String id = mDatabaseRef.push().getKey();
+                                                mDatabaseRef.child(id).setValue(mImageModel);
+                                                Toast.makeText(AddImageActivity.this, "Upload Successful w/o ML", Toast.LENGTH_SHORT).show();
+                                            });
                 }else {
-                    Toast.makeText(this, "Upload failed: " + task.getException() ,
+                    Toast.makeText(this, "Upload failed: " + taskA.getException() ,
                             Toast.LENGTH_LONG).show();
                 }
             });
