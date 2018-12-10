@@ -53,8 +53,10 @@ public class AddImageActivity extends AppCompatActivity {
     private static final int CAMERA_REQUEST = 1888;
     private static final int GALLERY_REQUEST = 1789;
 
+
     public static final int PICK_IMAGE = 1;
     public static final int TAKE_IMAGE = 2;
+
 
     private EditText myEditNameView;
     private EditText myEditDescView;
