@@ -5,29 +5,21 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.aantaya.imagewars.Models.ImageModel;
 import com.aantaya.imagewars.R;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -98,7 +90,7 @@ public class UsersImagesFragment extends Fragment {
                 holder.description.setText(model.getDescription());
                 holder.location.setText(model.getLocation());
                 holder.voteCount.setText("Number of Votes: " + String.valueOf(model.getVoteCount()));
-                holder.lables.setText("Lables: " + model.getLables());
+                holder.lables.setText("Lables: " + model.getLablesOnDeviceFirebase());
                 Picasso.with(getContext()).load(model.getImageUrl()).into(holder.image);
             }
 

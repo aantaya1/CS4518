@@ -42,7 +42,7 @@ public class UserImagesRecyclerAdapter extends RecyclerView.Adapter<UserImagesRe
         Log.d(TAG, "***Title: " + model.getTitle());
         imageHolder.title.setText(model.getTitle());
         imageHolder.description.setText(model.getDescription());
-        imageHolder.lables.setText(model.getLables());
+        imageHolder.lables.setText(model.getLablesOnDeviceFirebase());
         //Picasso.with(mContext).load(model.getImageUrl()).into(imageHolder.image);
         Picasso.with(mContext).load(model.getImageUrl()).fit().centerInside().into(imageHolder.image);
     }

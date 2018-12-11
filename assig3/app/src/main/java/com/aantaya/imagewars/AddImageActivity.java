@@ -195,7 +195,7 @@ public class AddImageActivity extends AppCompatActivity {
                                                 String imageUrl = taskA.getResult().toString();
                                                 Log.d(TAG, "Successful Upload URI: " + imageUrl);
 
-                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString());
+                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), "", "");
                                                 String id = mDatabaseRef.push().getKey();
                                                 mDatabaseRef.child(id).setValue(mImageModel);
                                                 Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
@@ -208,7 +208,7 @@ public class AddImageActivity extends AppCompatActivity {
                                                 String imageUrl = taskA.getResult().toString();
                                                 Log.d(TAG, "Successful Upload URI: " + imageUrl);
 
-                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables);
+                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables, "", "");
                                                 String id = mDatabaseRef.push().getKey();
                                                 mDatabaseRef.child(id).setValue(mImageModel);
                                                 Toast.makeText(AddImageActivity.this, "Upload Successful w/o ML", Toast.LENGTH_SHORT).show();
