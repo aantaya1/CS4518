@@ -6,6 +6,8 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -43,9 +45,20 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+
+import org.tensorflow.lite.Interpreter;
 
 public class AddImageActivity extends AppCompatActivity {
 
@@ -67,6 +80,10 @@ public class AddImageActivity extends AppCompatActivity {
     private Button saveButton;
 
     private String imagePath;
+    private ByteBuffer imgData;
+    private String[] labelArr = new String[1001];
+    private float[][] labelProbArray = new float[1][1001];
+    private StringBuilder tfLabels = new StringBuilder();
 
     private StorageReference mStorageRef;
     private DatabaseReference mDatabaseRef;
@@ -169,13 +186,85 @@ public class AddImageActivity extends AppCompatActivity {
         return mMime.getExtensionFromMimeType(mContent.getType(mUri));
     }
 
+    private void convertBitmapToByteBuffer(Bitmap bitmap) {
+        int[] intValues = new int[299 * 299];
+
+        if (imgData == null) {
+            return;
+        }
+        imgData.rewind();
+        bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+        // Convert the image to floating point.
+        int pixel = 0;
+        for (int i = 0; i < 299; ++i) {
+            for (int j = 0; j < 299; ++j) {
+                final int val = intValues[pixel++];
+                addPixelValue(val);
+            }
+        }
+    }
+
+    protected void addPixelValue(int pixelValue) {
+        imgData.putFloat((((pixelValue >> 16) & 0xFF) - 128) / 128.0f);
+        imgData.putFloat((((pixelValue >> 8) & 0xFF) - 128) / 128.0f);
+        imgData.putFloat(((pixelValue & 0xFF) - 128) / 128.0f);
+    }
+
+     private MappedByteBuffer loadModelFile() throws IOException{
+        AssetFileDescriptor fileDescriptor = getAssets().openFd("model/inception_v3.tflite");
+        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
+        FileChannel fileChannel = inputStream.getChannel();
+        long startOffset = fileDescriptor.getStartOffset();
+        long declaredLength = fileDescriptor.getDeclaredLength();
+        return  fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
+    }
+
+    void LabelProbDet() {
+        float curr;
+        double threshold = 0.03;
+
+        for (int i = 0; i < labelProbArray[0].length; i++) {
+            curr = labelProbArray[0][i];
+            if(curr > threshold) {
+                tfLabels.append(labelArr[i]);
+                tfLabels.append(",");
+            }
+        }
+
+    }
+    private void readLabels() throws IOException {
+        List<String> labelList = new ArrayList<>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open("model/labels.txt")));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            labelList.add(line);
+        }
+        reader.close();
+        labelList.toArray(labelArr);
+    }
+
     public void uploadFile(){
+        imgData = ByteBuffer.allocateDirect(1 * 299 * 299 * 3 * 4);
+        imgData.order(ByteOrder.nativeOrder());
+        Bitmap bitmap;
+        Bitmap bm;
+
+
         if(mUri != null){
             StorageReference fileReference = mStorageRef.child(System.currentTimeMillis() + "." + getFileExtention(mUri));
 
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mUri);
+
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mUri);
                 firebaseVisionImage = FirebaseVisionImage.fromBitmap(bitmap);
+                bm = Bitmap.createScaledBitmap(bitmap, 299, 299, true);
+                convertBitmapToByteBuffer(bm);
+                MappedByteBuffer tfliteModel = loadModelFile();
+                Interpreter tflite = new Interpreter(tfliteModel);
+                tflite.run(imgData, labelProbArray);
+                readLabels();
+                LabelProbDet();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -188,8 +277,10 @@ public class AddImageActivity extends AppCompatActivity {
                     Task<List<FirebaseVisionLabel>> result =
                             detector.detectInImage(firebaseVisionImage)
                                     .addOnSuccessListener( labels -> {
-                                                StringBuilder mLables = new StringBuilder();
-                                                for (FirebaseVisionLabel l : labels) mLables.append(l.getLabel()).append(", ");
+                                               // StringBuilder mLables = new StringBuilder();
+                                               //for (FirebaseVisionLabel l : labels) mLables.append(l.getLabel()).append(", ");
+
+
 
                                                 String title = myEditNameView.getText().toString().trim();
                                                 String desc = myEditDescView.getText().toString().trim();
@@ -197,7 +288,9 @@ public class AddImageActivity extends AppCompatActivity {
                                                 String imageUrl = taskA.getResult().toString();
                                                 Log.d(TAG, "Successful Upload URI: " + imageUrl);
 
-                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString());
+
+
+                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, tfLabels.toString());
                                                 String id = mDatabaseRef.push().getKey();
                                                 mDatabaseRef.child(id).setValue(mImageModel);
                                                 Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
@@ -215,7 +308,7 @@ public class AddImageActivity extends AppCompatActivity {
                                                 mDatabaseRef.child(id).setValue(mImageModel);
                                                 Toast.makeText(AddImageActivity.this, "Upload Successful w/o ML", Toast.LENGTH_SHORT).show();
                                             });
-                }else {
+                } else {
                     Toast.makeText(this, "Upload failed: " + taskA.getException() ,
                             Toast.LENGTH_LONG).show();
                 }
