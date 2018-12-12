@@ -11,13 +11,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f311dfdc-36c5-4fca-8d70-f80fd9788b30" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_tensorflow_tensorflow_lite_1_12_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/assets/model/inception_v3.pb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/assets/model/inception_v3.tflite" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/assets/model/labels.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/aantaya/imagewars/AddImageActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/aantaya/imagewars/AddImageActivity.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -80,8 +73,8 @@
       <file leaf-file-name="AddImageActivity.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aantaya/imagewars/AddImageActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="233" column="5" lean-forward="true" selection-start-line="233" selection-start-column="5" selection-end-line="233" selection-end-column="5" />
+            <state relative-caret-position="253">
+              <caret line="281" lean-forward="true" selection-start-line="281" selection-end-line="281" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -2658,8 +2651,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/aantaya/imagewars/AddImageActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="233" column="5" lean-forward="true" selection-start-line="233" selection-start-column="5" selection-end-line="233" selection-end-column="5" />
+        <state relative-caret-position="253">
+          <caret line="281" lean-forward="true" selection-start-line="281" selection-end-line="281" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

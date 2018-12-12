@@ -277,7 +277,7 @@ public class AddImageActivity extends AppCompatActivity {
                     Task<List<FirebaseVisionLabel>> result =
                             detector.detectInImage(firebaseVisionImage)
                                     .addOnSuccessListener( labels -> {
-                                               // StringBuilder mLables = new StringBuilder();
+                                               //StringBuilder mLables = new StringBuilder();
                                                //for (FirebaseVisionLabel l : labels) mLables.append(l.getLabel()).append(", ");
 
 
