@@ -187,40 +187,47 @@ public class AddImageActivity extends AppCompatActivity {
                 return fileReference.getDownloadUrl();
             }).addOnCompleteListener(taskA -> {
                 if (taskA.isSuccessful()){
-                    long before = System.currentTimeMillis();
-                    Task<List<FirebaseVisionCloudLabel>> result =
-                            cloudDetector.detectInImage(firebaseVisionImage)
-                                    .addOnSuccessListener( labels -> {
-                                                StringBuilder mLables = new StringBuilder();
-                                                for (FirebaseVisionCloudLabel l : labels) mLables.append(l.getLabel()).append(", ");
+                    Task<List<FirebaseVisionLabel>> result =
+                        detector.detectInImage(firebaseVisionImage)
+                            .addOnSuccessListener( labels -> {
+                                StringBuilder mLables = new StringBuilder();
+                                for (FirebaseVisionLabel l : labels) mLables.append(l.getLabel()).append(", ");
 
-                                                String title = myEditNameView.getText().toString().trim();
-                                                String desc = myEditDescView.getText().toString().trim();
-                                                String location = mLocation;
-                                                String imageUrl = taskA.getResult().toString();
-                                                Log.d(TAG, "Successful Upload URI: " + imageUrl);
+                                String title = myEditNameView.getText().toString().trim();
+                                String desc = myEditDescView.getText().toString().trim();
+                                String location = mLocation;
+                                String imageUrl = taskA.getResult().toString();
+                                Log.d(TAG, "Successful Upload URI: " + imageUrl);
+                                // Note: This is where the other image labeling will likely happen
 
-                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), "", "");
-                                                String id = mDatabaseRef.push().getKey();
-                                                mDatabaseRef.child(id).setValue(mImageModel);
-                                                Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
-                                                long after = System.currentTimeMillis();
-                                                Log.d("TIME-ML", after-before+"");
-                                            })
-                                    .addOnFailureListener( e -> {
-                                                Log.d("ML-ERROR", e.getLocalizedMessage());
-                                                String mLables = "N/A";
-                                                String title = myEditNameView.getText().toString().trim();
-                                                String desc = myEditDescView.getText().toString().trim();
-                                                String location = mLocation;
-                                                String imageUrl = taskA.getResult().toString();
-                                                Log.d(TAG, "Successful Upload URI: " + imageUrl);
+                                
 
-                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables, "", "");
-                                                String id = mDatabaseRef.push().getKey();
-                                                mDatabaseRef.child(id).setValue(mImageModel);
-                                                Toast.makeText(AddImageActivity.this, "Upload Successful w/o ML", Toast.LENGTH_SHORT).show();
-                                            });
+
+
+
+
+
+
+                                //Do not create the model until we have finished all of the other labeling
+                                // then you will pass all of the labels to this constructor so we can send it to firebase
+                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), "", "");
+                                String id = mDatabaseRef.push().getKey();
+                                mDatabaseRef.child(id).setValue(mImageModel);
+                                Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener( e -> {
+                                String mLables = "N/A";
+                                String title = myEditNameView.getText().toString().trim();
+                                String desc = myEditDescView.getText().toString().trim();
+                                String location = mLocation;
+                                String imageUrl = taskA.getResult().toString();
+                                Log.d(TAG, "Successful Upload URI: " + imageUrl);
+
+                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables, "", "");
+                                String id = mDatabaseRef.push().getKey();
+                                mDatabaseRef.child(id).setValue(mImageModel);
+                                Toast.makeText(AddImageActivity.this, "Upload Successful w/o ML", Toast.LENGTH_SHORT).show();
+                            });
                 }else {
                     Toast.makeText(this, "Upload failed: " + taskA.getException() ,
                             Toast.LENGTH_LONG).show();
