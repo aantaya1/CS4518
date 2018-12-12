@@ -187,6 +187,7 @@ public class AddImageActivity extends AppCompatActivity {
                 return fileReference.getDownloadUrl();
             }).addOnCompleteListener(taskA -> {
                 if (taskA.isSuccessful()){
+                    long beforeOnDeviceGoogle = System.currentTimeMillis();
                     Task<List<FirebaseVisionLabel>> result =
                         detector.detectInImage(firebaseVisionImage)
                             .addOnSuccessListener( labels -> {
@@ -199,17 +200,18 @@ public class AddImageActivity extends AppCompatActivity {
                                 String imageUrl = taskA.getResult().toString();
                                 Log.d(TAG, "Successful Upload URI: " + imageUrl);
                                 // Note: This is where the other image labeling will likely happen
-
+                                long afterOnDeviceGoogle = System.currentTimeMillis();
                                 Task<List<FirebaseVisionCloudLabel>> cloudResult =
                                         cloudDetector.detectInImage(firebaseVisionImage)
                                         .addOnSuccessListener(cloudLabels -> {
                                             Log.d("GOOGLE-CLOUD", cloudLabels.toString());
                                             StringBuilder mCloudLabels = new StringBuilder();
                                             for (FirebaseVisionCloudLabel l : cloudLabels) mCloudLabels.append(l.getLabel()).append(", ");
-
+                                            long afterOffDeviceGoogle = System.currentTimeMillis();
                                             // then we do tensorflow
 
-
+                                            long onDeviceGoogleTime = afterOnDeviceGoogle - beforeOnDeviceGoogle;
+                                            long offDeviceGoogleTime = afterOffDeviceGoogle - afterOnDeviceGoogle;
                                             // this vvv will be inside the tensorflow on success
                                             //Do not create the model until we have finished all of the other labeling
                                             // then you will pass all of the labels to this constructor so we can send it to firebase
