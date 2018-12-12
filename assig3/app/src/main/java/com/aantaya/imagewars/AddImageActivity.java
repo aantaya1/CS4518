@@ -200,20 +200,32 @@ public class AddImageActivity extends AppCompatActivity {
                                 Log.d(TAG, "Successful Upload URI: " + imageUrl);
                                 // Note: This is where the other image labeling will likely happen
 
-                                
+                                Task<List<FirebaseVisionCloudLabel>> cloudResult =
+                                        cloudDetector.detectInImage(firebaseVisionImage)
+                                        .addOnSuccessListener(cloudLabels -> {
+                                            Log.d("GOOGLE-CLOUD", cloudLabels.toString());
+                                            StringBuilder mCloudLabels = new StringBuilder();
+                                            for (FirebaseVisionCloudLabel l : cloudLabels) mCloudLabels.append(l.getLabel()).append(", ");
+
+                                            // then we do tensorflow
 
 
+                                            // this vvv will be inside the tensorflow on success
+                                            //Do not create the model until we have finished all of the other labeling
+                                            // then you will pass all of the labels to this constructor so we can send it to firebase
+                                            ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), mCloudLabels.toString(), "");
+                                            String id = mDatabaseRef.push().getKey();
+                                            mDatabaseRef.child(id).setValue(mImageModel);
+                                            Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener( e -> {
+                                            Log.d(TAG, "Successful Upload URI: " + imageUrl);
 
-
-
-
-
-                                //Do not create the model until we have finished all of the other labeling
-                                // then you will pass all of the labels to this constructor so we can send it to firebase
-                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), "", "");
-                                String id = mDatabaseRef.push().getKey();
-                                mDatabaseRef.child(id).setValue(mImageModel);
-                                Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
+                                            ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), "N/A", "");
+                                            String id = mDatabaseRef.push().getKey();
+                                            mDatabaseRef.child(id).setValue(mImageModel);
+                                            Toast.makeText(AddImageActivity.this, "Upload Successful w/ Google On-device ML", Toast.LENGTH_SHORT).show();
+                                        });
                             })
                             .addOnFailureListener( e -> {
                                 String mLables = "N/A";
