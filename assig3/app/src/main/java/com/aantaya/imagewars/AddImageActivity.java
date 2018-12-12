@@ -262,82 +262,94 @@ public class AddImageActivity extends AppCompatActivity {
                 bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mUri);
                 firebaseVisionImage = FirebaseVisionImage.fromBitmap(bitmap);
                 bm = Bitmap.createScaledBitmap(bitmap, 299, 299, true);
+
+                long beforeTensorFlow = System.currentTimeMillis();
                 convertBitmapToByteBuffer(bm);
                 MappedByteBuffer tfliteModel = loadModelFile();
                 Interpreter tflite = new Interpreter(tfliteModel);
                 tflite.run(imgData, labelProbArray);
                 readLabels();
                 LabelProbDet();
+                long afterTensorFlow = System.currentTimeMillis();
 
+                fileReference.putFile(mUri).continueWithTask(task -> {
+                    if(!task.isSuccessful()) throw task.getException();
+                    return fileReference.getDownloadUrl();
+                }).addOnCompleteListener(taskA -> {
+                    if (taskA.isSuccessful()){
+                        long beforeOnDeviceGoogle = System.currentTimeMillis();
+                        Task<List<FirebaseVisionLabel>> result =
+                                detector.detectInImage(firebaseVisionImage)
+                                        .addOnSuccessListener( labels -> {
+                                            StringBuilder mLables = new StringBuilder();
+                                            for (FirebaseVisionLabel l : labels) mLables.append(l.getLabel()).append(", ");
+
+                                            String title = myEditNameView.getText().toString().trim();
+                                            String desc = myEditDescView.getText().toString().trim();
+                                            String location = mLocation;
+                                            String imageUrl = taskA.getResult().toString();
+                                            Log.d(TAG, "Successful Upload URI: " + imageUrl);
+                                            // Note: This is where the other image labeling will likely happen
+                                            long afterOnDeviceGoogle = System.currentTimeMillis();
+                                            Task<List<FirebaseVisionCloudLabel>> cloudResult =
+                                                    cloudDetector.detectInImage(firebaseVisionImage)
+                                                            .addOnSuccessListener(cloudLabels -> {
+                                                                Log.d("GOOGLE-CLOUD", cloudLabels.toString());
+                                                                StringBuilder mCloudLabels = new StringBuilder();
+                                                                for (FirebaseVisionCloudLabel l : cloudLabels) mCloudLabels.append(l.getLabel()).append(", ");
+                                                                long afterOffDeviceGoogle = System.currentTimeMillis();
+                                                                // then we do tensorflow
+
+                                                                long onDeviceGoogleTime = afterOnDeviceGoogle - beforeOnDeviceGoogle;
+                                                                long offDeviceGoogleTime = afterOffDeviceGoogle - afterOnDeviceGoogle;
+                                                                // this vvv will be inside the tensorflow on success
+                                                                //Do not create the model until we have finished all of the other labeling
+                                                                // then you will pass all of the labels to this constructor so we can send it to firebase
+                                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), mCloudLabels.toString(), tfLabels.toString());
+                                                                mImageModel.setTimeOnDeviceTensorFlow(afterTensorFlow - beforeTensorFlow);
+                                                                mImageModel.setTimeOffDeviceFirebase(offDeviceGoogleTime);
+                                                                mImageModel.setTimeOnDeviceFirebase(onDeviceGoogleTime);
+                                                                String id = mDatabaseRef.push().getKey();
+                                                                mDatabaseRef.child(id).setValue(mImageModel);
+                                                                Toast.makeText(AddImageActivity.this, "Upload Successful w/ All 3 ML", Toast.LENGTH_SHORT).show();
+                                                            })
+                                                            .addOnFailureListener( e -> {
+                                                                Log.d(TAG, "Successful Upload URI: " + imageUrl);
+                                                                long onDeviceGoogleTime = afterOnDeviceGoogle - beforeOnDeviceGoogle;
+
+                                                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), "N/A", tfLabels.toString());
+                                                                mImageModel.setTimeOnDeviceTensorFlow(afterTensorFlow - beforeTensorFlow);
+                                                                mImageModel.setTimeOffDeviceFirebase(-1);
+                                                                mImageModel.setTimeOnDeviceFirebase(onDeviceGoogleTime);
+                                                                String id = mDatabaseRef.push().getKey();
+                                                                mDatabaseRef.child(id).setValue(mImageModel);
+                                                                Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML 1 & 2", Toast.LENGTH_SHORT).show();
+                                                            });
+                                        })
+                                        .addOnFailureListener( e -> {
+                                            String mLables = "N/A";
+                                            String title = myEditNameView.getText().toString().trim();
+                                            String desc = myEditDescView.getText().toString().trim();
+                                            String location = mLocation;
+                                            String imageUrl = taskA.getResult().toString();
+                                            Log.d(TAG, "Successful Upload URI: " + imageUrl);
+
+                                            ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables, "", tfLabels.toString());
+                                            mImageModel.setTimeOnDeviceTensorFlow(afterTensorFlow - beforeTensorFlow);
+                                            mImageModel.setTimeOffDeviceFirebase(-1);
+                                            mImageModel.setTimeOnDeviceFirebase(-1);
+                                            String id = mDatabaseRef.push().getKey();
+                                            mDatabaseRef.child(id).setValue(mImageModel);
+                                            Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML 1", Toast.LENGTH_SHORT).show();
+                                        });
+                    }else {
+                        Toast.makeText(this, "Upload failed: " + taskA.getException() ,
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            fileReference.putFile(mUri).continueWithTask(task -> {
-                if(!task.isSuccessful()) throw task.getException();
-                return fileReference.getDownloadUrl();
-            }).addOnCompleteListener(taskA -> {
-                if (taskA.isSuccessful()){
-                    long beforeOnDeviceGoogle = System.currentTimeMillis();
-                    Task<List<FirebaseVisionLabel>> result =
-                        detector.detectInImage(firebaseVisionImage)
-                            .addOnSuccessListener( labels -> {
-                                StringBuilder mLables = new StringBuilder();
-                                for (FirebaseVisionLabel l : labels) mLables.append(l.getLabel()).append(", ");
-
-                                String title = myEditNameView.getText().toString().trim();
-                                String desc = myEditDescView.getText().toString().trim();
-                                String location = mLocation;
-                                String imageUrl = taskA.getResult().toString();
-                                Log.d(TAG, "Successful Upload URI: " + imageUrl);
-                                // Note: This is where the other image labeling will likely happen
-                                long afterOnDeviceGoogle = System.currentTimeMillis();
-                                Task<List<FirebaseVisionCloudLabel>> cloudResult =
-                                        cloudDetector.detectInImage(firebaseVisionImage)
-                                        .addOnSuccessListener(cloudLabels -> {
-                                            Log.d("GOOGLE-CLOUD", cloudLabels.toString());
-                                            StringBuilder mCloudLabels = new StringBuilder();
-                                            for (FirebaseVisionCloudLabel l : cloudLabels) mCloudLabels.append(l.getLabel()).append(", ");
-                                            long afterOffDeviceGoogle = System.currentTimeMillis();
-                                            // then we do tensorflow
-
-                                            long onDeviceGoogleTime = afterOnDeviceGoogle - beforeOnDeviceGoogle;
-                                            long offDeviceGoogleTime = afterOffDeviceGoogle - afterOnDeviceGoogle;
-                                            // this vvv will be inside the tensorflow on success
-                                            //Do not create the model until we have finished all of the other labeling
-                                            // then you will pass all of the labels to this constructor so we can send it to firebase
-                                            ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), mCloudLabels.toString(), "");
-                                            String id = mDatabaseRef.push().getKey();
-                                            mDatabaseRef.child(id).setValue(mImageModel);
-                                            Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
-                                        })
-                                        .addOnFailureListener( e -> {
-                                            Log.d(TAG, "Successful Upload URI: " + imageUrl);
-
-                                            ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), "N/A", "");
-                                            String id = mDatabaseRef.push().getKey();
-                                            mDatabaseRef.child(id).setValue(mImageModel);
-                                            Toast.makeText(AddImageActivity.this, "Upload Successful w/ Google On-device ML", Toast.LENGTH_SHORT).show();
-                                        });
-                            })
-                            .addOnFailureListener( e -> {
-                                String mLables = "N/A";
-                                String title = myEditNameView.getText().toString().trim();
-                                String desc = myEditDescView.getText().toString().trim();
-                                String location = mLocation;
-                                String imageUrl = taskA.getResult().toString();
-                                Log.d(TAG, "Successful Upload URI: " + imageUrl);
-
-                                ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables, "", "");
-                                String id = mDatabaseRef.push().getKey();
-                                mDatabaseRef.child(id).setValue(mImageModel);
-                                Toast.makeText(AddImageActivity.this, "Upload Successful w/o ML", Toast.LENGTH_SHORT).show();
-                            });
-                }else {
-                    Toast.makeText(this, "Upload failed: " + taskA.getException() ,
-                            Toast.LENGTH_LONG).show();
-                }
-            });
         }
     }
 }
