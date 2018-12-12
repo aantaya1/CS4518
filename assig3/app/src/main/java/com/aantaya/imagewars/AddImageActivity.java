@@ -34,6 +34,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.cloud.label.FirebaseVisionCloudLabel;
+import com.google.firebase.ml.vision.cloud.label.FirebaseVisionCloudLabelDetector;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.label.FirebaseVisionLabel;
 import com.google.firebase.ml.vision.label.FirebaseVisionLabelDetector;
@@ -71,6 +73,7 @@ public class AddImageActivity extends AppCompatActivity {
     private Uri mUri;
 
     private FirebaseVisionLabelDetector detector;
+    private FirebaseVisionCloudLabelDetector cloudDetector;
     private FirebaseVisionImage firebaseVisionImage;
 
     //Location will be stored as a lat & long separated by a comma
@@ -88,6 +91,7 @@ public class AddImageActivity extends AppCompatActivity {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference("uploads");
 
         detector = FirebaseVision.getInstance().getVisionLabelDetector();
+        cloudDetector = FirebaseVision.getInstance().getVisionCloudLabelDetector();
 
         getLocation();
 
@@ -183,11 +187,12 @@ public class AddImageActivity extends AppCompatActivity {
                 return fileReference.getDownloadUrl();
             }).addOnCompleteListener(taskA -> {
                 if (taskA.isSuccessful()){
-                    Task<List<FirebaseVisionLabel>> result =
-                            detector.detectInImage(firebaseVisionImage)
+                    long before = System.currentTimeMillis();
+                    Task<List<FirebaseVisionCloudLabel>> result =
+                            cloudDetector.detectInImage(firebaseVisionImage)
                                     .addOnSuccessListener( labels -> {
                                                 StringBuilder mLables = new StringBuilder();
-                                                for (FirebaseVisionLabel l : labels) mLables.append(l.getLabel()).append(", ");
+                                                for (FirebaseVisionCloudLabel l : labels) mLables.append(l.getLabel()).append(", ");
 
                                                 String title = myEditNameView.getText().toString().trim();
                                                 String desc = myEditDescView.getText().toString().trim();
@@ -199,8 +204,11 @@ public class AddImageActivity extends AppCompatActivity {
                                                 String id = mDatabaseRef.push().getKey();
                                                 mDatabaseRef.child(id).setValue(mImageModel);
                                                 Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
+                                                long after = System.currentTimeMillis();
+                                                Log.d("TIME-ML", after-before+"");
                                             })
                                     .addOnFailureListener( e -> {
+                                                Log.d("ML-ERROR", e.getLocalizedMessage());
                                                 String mLables = "N/A";
                                                 String title = myEditNameView.getText().toString().trim();
                                                 String desc = myEditDescView.getText().toString().trim();
