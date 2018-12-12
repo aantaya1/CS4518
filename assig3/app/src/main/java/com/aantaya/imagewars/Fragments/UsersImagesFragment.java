@@ -90,7 +90,6 @@ public class UsersImagesFragment extends Fragment {
                 holder.description.setText(model.getDescription());
                 holder.location.setText(model.getLocation());
                 holder.voteCount.setText("Number of Votes: " + String.valueOf(model.getVoteCount()));
-                holder.lables.setText("Lables: " + model.getLablesOnDeviceFirebase());
                 Picasso.with(getContext()).load(model.getImageUrl()).into(holder.image);
             }
 
@@ -133,7 +132,6 @@ public class UsersImagesFragment extends Fragment {
         TextView description;
         TextView location;
         TextView voteCount;
-        TextView lables;
 
         MImageHolder(@NonNull View itemView) {
             super(itemView);
@@ -143,7 +141,6 @@ public class UsersImagesFragment extends Fragment {
             description = itemView.findViewById(R.id.recyclerview_desc);
             location = itemView.findViewById(R.id.recyclerview_location);
             voteCount = itemView.findViewById(R.id.recyclerview_votes);
-            lables = itemView.findViewById(R.id.recyclerview_lables);
         }
     }
 }
