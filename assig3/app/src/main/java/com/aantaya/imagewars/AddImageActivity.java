@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -183,9 +184,13 @@ public class AddImageActivity extends AppCompatActivity {
                 return fileReference.getDownloadUrl();
             }).addOnCompleteListener(taskA -> {
                 if (taskA.isSuccessful()){
+                    long startTime = SystemClock.uptimeMillis();
+
                     Task<List<FirebaseVisionLabel>> result =
                             detector.detectInImage(firebaseVisionImage)
                                     .addOnSuccessListener( labels -> {
+                                                long endTime = SystemClock.uptimeMillis();
+                                                double elapsedTime = (double)(endTime - startTime);
                                                 StringBuilder mLables = new StringBuilder();
                                                 for (FirebaseVisionLabel l : labels) mLables.append(l.getLabel()).append(", ");
 
@@ -196,11 +201,14 @@ public class AddImageActivity extends AppCompatActivity {
                                                 Log.d(TAG, "Successful Upload URI: " + imageUrl);
 
                                                 ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables.toString(), "", "");
+                                                mImageModel.setTimeOnDeviceFirebase(elapsedTime);
                                                 String id = mDatabaseRef.push().getKey();
                                                 mDatabaseRef.child(id).setValue(mImageModel);
                                                 Toast.makeText(AddImageActivity.this, "Upload Successful w/ ML", Toast.LENGTH_SHORT).show();
                                             })
                                     .addOnFailureListener( e -> {
+                                                long endTime = SystemClock.uptimeMillis();
+                                                double elapsedTime = (double)(endTime - startTime);
                                                 String mLables = "N/A";
                                                 String title = myEditNameView.getText().toString().trim();
                                                 String desc = myEditDescView.getText().toString().trim();
@@ -209,6 +217,7 @@ public class AddImageActivity extends AppCompatActivity {
                                                 Log.d(TAG, "Successful Upload URI: " + imageUrl);
 
                                                 ImageModel mImageModel = new ImageModel(title, desc, imageUrl, location, 0, mLables, "", "");
+                                                mImageModel.setTimeOnDeviceFirebase(elapsedTime);
                                                 String id = mDatabaseRef.push().getKey();
                                                 mDatabaseRef.child(id).setValue(mImageModel);
                                                 Toast.makeText(AddImageActivity.this, "Upload Successful w/o ML", Toast.LENGTH_SHORT).show();

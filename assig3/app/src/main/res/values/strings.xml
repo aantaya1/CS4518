@@ -47,4 +47,5 @@
     <string name="positive_button">Love It</string>
     <string name="negative_button">Hate It</string>
     <string name="location">Location: </string>
+    <string name="title_activity_card_view">CardViewActivity</string>
 </resources>

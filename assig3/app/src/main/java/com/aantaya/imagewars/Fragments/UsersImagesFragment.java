@@ -1,17 +1,21 @@
 package com.aantaya.imagewars.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.aantaya.imagewars.CardViewActivity;
 import com.aantaya.imagewars.Models.ImageModel;
 import com.aantaya.imagewars.R;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -91,6 +95,8 @@ public class UsersImagesFragment extends Fragment {
                 holder.location.setText(model.getLocation());
                 holder.voteCount.setText("Number of Votes: " + String.valueOf(model.getVoteCount()));
                 holder.lables.setText("Lables: " + model.getLablesOnDeviceFirebase());
+                holder.url = model.getImageUrl();
+                Log.v(TAG, "Image UUID: " + model.getImageUrl());
                 Picasso.with(getContext()).load(model.getImageUrl()).into(holder.image);
             }
 
@@ -100,7 +106,21 @@ public class UsersImagesFragment extends Fragment {
                 View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_view_item,
                         viewGroup, false);
                 progressBar.setVisibility(View.INVISIBLE);
-                return new MImageHolder(v);
+                MImageHolder holder = new MImageHolder(v);
+                holder.setOnClickListener(new MImageHolder.ClickListener(){
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        openCardView(holder.url);
+                        Toast.makeText(getActivity(), "Item clicked at " + position, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                        openCardView(holder.url);
+                        Toast.makeText(getActivity(), "Item long clicked at " + position, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return holder;
             }
         };
 
@@ -118,8 +138,17 @@ public class UsersImagesFragment extends Fragment {
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
 
+        // set on click listener
+
         adapter.startListening();
     }
+
+    public void openCardView(String url){
+        Intent intent = new Intent(getActivity(), CardViewActivity.class);
+        intent.putExtra("URL", url);
+        startActivity(intent);
+    }
+
 
     @Override
     public void onStop() {
@@ -128,6 +157,7 @@ public class UsersImagesFragment extends Fragment {
     }
 
     public static class MImageHolder extends RecyclerView.ViewHolder{
+        String url;
         ImageView image;
         TextView title;
         TextView description;
@@ -144,6 +174,31 @@ public class UsersImagesFragment extends Fragment {
             location = itemView.findViewById(R.id.recyclerview_location);
             voteCount = itemView.findViewById(R.id.recyclerview_votes);
             lables = itemView.findViewById(R.id.recyclerview_lables);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mClickListener.onItemClick(v, getAdapterPosition());
+
+                }
+            });
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    mClickListener.onItemLongClick(v, getAdapterPosition());
+                    return true;
+                }
+            });
+        }
+        private MImageHolder.ClickListener mClickListener;
+
+        public interface ClickListener{
+            public void onItemClick(View view, int position);
+            public void onItemLongClick(View view, int position);
+        }
+
+        public void setOnClickListener(MImageHolder.ClickListener clickListener){
+            mClickListener = clickListener;
         }
     }
 }
