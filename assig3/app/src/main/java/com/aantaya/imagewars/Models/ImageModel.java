@@ -61,6 +61,9 @@ public class ImageModel {
         this.lablesOnDeviceFirebase = m.getLablesOnDeviceFirebase();
         this.lablesOffDeviceFirebase = m.getLablesOffDeviceFirebase();
         this.lablesOnDeviceTensorFlow = m.getLablesOnDeviceTensorFlow();
+        this.timeOnDeviceTensorFlow = m.getTimeOnDeviceTensorFlow();
+        this.timeOffDeviceFirebase = m.getTimeOffDeviceFirebase();
+        this.timeOnDeviceFirebase = m.getTimeOnDeviceFirebase();
         this.voteCount = mVoteCount;
     }
 
